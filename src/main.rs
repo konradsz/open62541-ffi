@@ -1,6 +1,6 @@
 mod open62541;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use signal_hook::iterator::Signals;
 use std::{
     sync::{atomic::AtomicBool, Arc},
@@ -10,9 +10,15 @@ use std::{
 fn main() -> Result<()> {
     let server = unsafe { open62541::UA_Server_new() };
     let config = unsafe { open62541::UA_Server_getConfig(server) };
-    unsafe {
+    let retval = unsafe {
         open62541::UA_ServerConfig_setMinimalCustomBuffer(config, 4840, std::ptr::null(), 0, 0)
     };
+    if retval != 0 {
+        return Err(anyhow!(
+            "UA_ServerConfig_setMinimalCustomBuffer returned {}",
+            retval
+        ));
+    }
 
     let mut signals = Signals::new(&[signal_hook::consts::SIGINT, signal_hook::consts::SIGTERM])?;
 
@@ -26,9 +32,11 @@ fn main() -> Result<()> {
     let running = Arc::<AtomicBool>::as_ptr(&running).cast();
 
     let retval = unsafe { open62541::UA_Server_run(server, running) };
-    unsafe { open62541::UA_Server_delete(server) };
+    if retval != 0 {
+        return Err(anyhow!("UA_Server_run returned {}", retval));
+    }
 
-    println!("Retval: {}", retval);
+    unsafe { open62541::UA_Server_delete(server) };
 
     Ok(())
 }
