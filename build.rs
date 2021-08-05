@@ -20,18 +20,7 @@ fn main() {
     println!("cargo:rustc-link-lib=open62541");
     println!("cargo:rerun-if-changed=wrapper.h");
 
-    let ignored_macros = IgnoreMacros(
-        vec![
-            "FP_INFINITE".into(),
-            "FP_NAN".into(),
-            "FP_NORMAL".into(),
-            "FP_SUBNORMAL".into(),
-            "FP_ZERO".into(),
-            "IPPORT_RESERVED".into(),
-        ]
-        .into_iter()
-        .collect(),
-    );
+    let ignored_macros = IgnoreMacros(vec!["IPPORT_RESERVED".into()].into_iter().collect());
 
     let bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}/include", dst.display()))
