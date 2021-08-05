@@ -10,9 +10,15 @@ use std::{
 fn main() -> Result<()> {
     let server = unsafe { open62541::UA_Server_new() };
     let config = unsafe { open62541::UA_Server_getConfig(server) };
-    unsafe {
+    let retval = unsafe {
         open62541::UA_ServerConfig_setMinimalCustomBuffer(config, 4840, std::ptr::null(), 0, 0)
     };
+    if retval != 0 {
+        return Err(anyhow!(
+            "UA_ServerConfig_setMinimalCustomBuffer returned {}",
+            retval
+        ));
+    }
 
     let mut signals = Signals::new(&[signal_hook::consts::SIGINT, signal_hook::consts::SIGTERM])?;
 
@@ -31,7 +37,10 @@ fn main() -> Result<()> {
     let my_integer_ptr = &my_integer as *const _ as *const c_void;
     let my_type = unsafe { &open62541::UA_TYPES[open62541::UA_TYPES_INT32 as usize] };
 
-    unsafe { open62541::UA_Variant_setScalarCopy(value_ptr, my_integer_ptr, my_type) };
+    let retval = unsafe { open62541::UA_Variant_setScalarCopy(value_ptr, my_integer_ptr, my_type) };
+    if retval != 0 {
+        return Err(anyhow!("UA_Variant_setScalarCopy returned {}", retval));
+    }
 
     unsafe {
         attr.description = open62541::UA_LocalizedText {
@@ -73,7 +82,7 @@ fn main() -> Result<()> {
         },
     };
 
-    unsafe {
+    let retval = unsafe {
         open62541::__UA_Server_addNode(
             server,
             open62541::UA_NodeClass_UA_NODECLASS_VARIABLE,
@@ -86,7 +95,10 @@ fn main() -> Result<()> {
             &open62541::UA_TYPES[open62541::UA_TYPES_VARIABLEATTRIBUTES as usize],
             std::ptr::null_mut(),
             std::ptr::null_mut(),
-        );
+        )
+    };
+    if retval != 0 {
+        return Err(anyhow!("__UA_Server_addNode returned {}", retval));
     }
 
     unsafe {
