@@ -20,29 +20,24 @@ fn main() {
     println!("cargo:rustc-link-lib=open62541");
     println!("cargo:rerun-if-changed=wrapper.h");
 
-    // let ignored_macros = IgnoreMacros(
-    //     vec![
-    //         "FP_INFINITE".into(),
-    //         "FP_NAN".into(),
-    //         "FP_NORMAL".into(),
-    //         "FP_SUBNORMAL".into(),
-    //         "FP_ZERO".into(),
-    //         "IPPORT_RESERVED".into(),
-    //     ]
-    //     .into_iter()
-    //     .collect(),
-    // );
+    let ignored_macros = IgnoreMacros(
+        vec![
+            "FP_INFINITE".into(),
+            "FP_NAN".into(),
+            "FP_NORMAL".into(),
+            "FP_SUBNORMAL".into(),
+            "FP_ZERO".into(),
+            "IPPORT_RESERVED".into(),
+        ]
+        .into_iter()
+        .collect(),
+    );
 
     let bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}/include", dst.display()))
         .header("wrapper.h")
-        //.parse_callbacks(Box::new(ignored_macros))
+        .parse_callbacks(Box::new(ignored_macros))
         .rustfmt_bindings(true)
-        .allowlist_function("UA_Server_new")
-        .allowlist_function("UA_Server_getConfig")
-        .allowlist_function("UA_ServerConfig_setMinimalCustomBuffer")
-        .allowlist_function("UA_Server_run")
-        .allowlist_function("UA_Server_delete")
         .generate()
         .expect("Unable to generate bindings");
 
@@ -50,6 +45,4 @@ fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
-
-    println!("Wrote {}/bindings.rs", env::var("OUT_DIR").unwrap());
 }
