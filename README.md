@@ -1,6 +1,8 @@
 # open62541-ffi
 Rust FFI bindings for [open62541](https://github.com/open62541/open62541) library.
 
+A follow-up to [open62541-sys](https://github.com/miehe-dup/open62541-sys) work.
+
 ## Building
 
 ```bash
