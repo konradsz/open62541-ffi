@@ -8,5 +8,7 @@ git clone git@github.com:konradsz/open62541-ffi.git
 cd open62541-ffi
 git submodule init
 git submodule update
-cargo run --release
+
+# run one of the binaries, e.g.:
+cargo run --release --bin tutorial_server_firststeps
 ```
