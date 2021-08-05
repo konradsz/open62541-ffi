@@ -32,12 +32,16 @@ fn main() -> Result<()> {
     let running = Arc::<AtomicBool>::as_ptr(&running).cast();
 
     let mut attr = unsafe { open62541::UA_VariableAttributes_default };
-    let value_ptr = &mut attr.value as *mut open62541::UA_Variant;
     let my_integer = 42;
-    let my_integer_ptr = &my_integer as *const _ as *const c_void;
     let my_type = unsafe { &open62541::UA_TYPES[open62541::UA_TYPES_INT32 as usize] };
 
-    let retval = unsafe { open62541::UA_Variant_setScalarCopy(value_ptr, my_integer_ptr, my_type) };
+    let retval = unsafe {
+        open62541::UA_Variant_setScalarCopy(
+            &mut attr.value as *mut open62541::UA_Variant,
+            &my_integer as *const _ as *const c_void,
+            my_type,
+        )
+    };
     if retval != 0 {
         return Err(anyhow!("UA_Variant_setScalarCopy returned {}", retval));
     }
