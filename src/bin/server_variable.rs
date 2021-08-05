@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use libc::c_void;
-use open62541_ffi::open62541;
+use open62541_ffi as open62541;
 use signal_hook::iterator::Signals;
 use std::{
     sync::{atomic::AtomicBool, Arc},
